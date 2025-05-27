@@ -1,0 +1,27 @@
+{
+  "name": "cookie-consent-demo",
+  "version": "1.0.0",
+  "main": "./src/app.ts",
+  "module": "esm",
+  "license": "MIT",  "scripts": {
+    "dev": "yarn build:component && yarn build:demo && yarn serve",
+    "dev:watch": "yarn build:component:watch",
+    "build": "yarn build:component && yarn build:demo",
+    "build:component": "cd ../web && yarn build",
+    "build:component:watch": "cd ../web && yarn dev",
+    "build:demo": "yarn copy:files",
+    "copy:files": "pwsh -Command \"if (!(Test-Path 'dist')) { New-Item -ItemType Directory -Path 'dist' }; Copy-Item 'index.html' 'dist/' -Force; Copy-Item 'demo.js' 'dist/' -Force; Copy-Item '../web/dist/cookie-consent.js' 'dist/' -Force; if (Test-Path 'scripts') { Copy-Item 'scripts' 'dist/' -Recurse -Force }\"",    "serve": "npx http-server dist -p 3001 -o",
+    "serve:watch": "npx http-server dist -p 3000 -o --watch",
+    "serve:simple": "node serve.mjs",
+    "clean": "pwsh -Command \"if (Test-Path 'dist') { Remove-Item -Recurse -Force 'dist' }\""
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-tsc": "^0.4.0",
+    "http-server": "^14.1.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+  }
+}

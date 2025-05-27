@@ -1,0 +1,43 @@
+{
+  "name": "@glideroggan/cookie-consent",
+  "version": "0.1.0",
+  "description": "A vanilla TypeScript web component for GDPR-compliant cookie consent management",
+  "type": "module",
+  "main": "./dist/cookie-consent.js",
+  "module": "./dist/cookie-consent.esm.js",
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "cookie",
+    "consent",
+    "gdpr",
+    "web-component",
+    "vanilla",
+    "typescript"
+  ],
+  "author": "glideroggan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glideroggan/cookie-consent.git"
+  },
+  "homepage": "https://github.com/glideroggan/cookie-consent#readme",
+  "scripts": {
+    "dev": "esbuild src/index.ts --bundle --sourcemap --outfile=dist/cookie-consent.js --watch --format=esm",
+    "build": "yarn build:esm && yarn build:umd && yarn build:types",
+    "build:esm": "esbuild src/index.ts --bundle --minify --outfile=dist/cookie-consent.esm.js --format=esm",
+    "build:umd": "esbuild src/index.ts --bundle --minify --outfile=dist/cookie-consent.js --format=iife --global-name=CookieConsent",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
+    "prepublishOnly": "yarn build"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-tsc": "^0.4.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {},
+  "peerDependencies": {}
+}

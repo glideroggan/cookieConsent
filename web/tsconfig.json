@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "allowImportingTsExtensions": true,
+    "sourceMap": true,
+    "target": "es2017",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noEmitOnError": true,
+    "strictPropertyInitialization": false,
+    "strict": true,
+    "rootDir": "src",
+    "lib": ["dom", "esnext"],
+    "emitDeclarationOnly": true,
+    "esModuleInterop": true,
+    "paths": {}
+  },
+  "include": ["src/**/*", "typings.d.ts"]
+}

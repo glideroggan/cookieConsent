@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Cookie Consent Demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+        }
+
+        .btn.secondary:hover {
+            background: #545b62;
+        }
+
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .status.granted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.denied {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style> <!-- Mock API for demo -->
+
+    <!-- Cookie Consent Component - served locally from dist -->
+    <script src="./cookie-consent.js"></script>
+    
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍪 Cookie Consent Demo</h1>
+
+        <div class="demo-section">
+            <h2>Basic Usage</h2>
+            <p>Simply add the component to your page and it will automatically check for consent:</p>
+            <code>&lt;cookie-consent&gt;&lt;/cookie-consent&gt;</code>
+            <div class="controls">
+                <h3>Demo Controls</h3>
+                <button class="btn" onclick="clearConsent()">Clear Consent</button>
+                <button class="btn secondary" onclick="showConsentStatus()">Show Current Status</button>
+                <button class="btn" onclick="triggerConsent()">Show Consent Dialog</button>
+            </div>
+
+            <div id="consent-status" class="status pending">
+                Status: Checking consent...
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>With Custom Configuration</h2>
+            <p>Configure the component with attributes:</p>
+            <code>&lt;cookie-consent api-url="http://localhost:5000/api" theme="dark" position="top"&gt;&lt;/cookie-consent&gt;</code>
+        </div>
+        <div class="demo-section">
+            <h2>Consent-Based Script Loading</h2>
+            <p>These scripts are initially blocked (<code>type="text/plain"</code>) and will only execute when consent
+                is given.
+                The component dynamically changes the script type to enable them.</p>
+            <div class="script-demo">
+                <h4>Analytics Script (requires 'analytics' consent)</h4>
+                <code>&lt;script type="text/plain" data-consent="analytics" src="./scripts/analytics-demo.js"&gt;</code>
+                <div class="script-status-indicator">
+                    <div id="analytics-indicator" class="status pending">⏳ Blocked - waiting for analytics consent</div>
+                </div>
+            </div>
+
+            <div class="script-demo">
+                <h4>Marketing Script (requires 'marketing' consent)</h4>
+                <code>&lt;script type="text/plain" data-consent="marketing" src="./scripts/marketing-demo.js"&gt;</code>
+                <div class="script-status-indicator">
+                    <div id="marketing-indicator" class="status pending">⏳ Blocked - waiting for marketing consent</div>
+                </div>
+            </div>
+
+            <div class="script-demo">
+                <h4>Necessary Script (always enabled)</h4>
+                <code>&lt;script type="text/plain" data-consent="necessary" src="./scripts/necessary-demo.js"&gt;</code>
+                <div class="script-status-indicator">
+                    <div id="necessary-indicator" class="status pending">⏳ Blocked - waiting for necessary consent</div>
+                </div>
+            </div>
+
+            <div class="script-demo">
+                <h4>External Analytics (simulates Google Analytics)</h4>
+                <code>&lt;script type="text/plain" data-consent="analytics" src="./scripts/external-analytics.js"&gt;</code>
+                <div class="script-status-indicator">
+                    <div id="external-analytics-indicator" class="status pending">⏳ Blocked - external script not loaded
+                    </div>
+                </div>
+            </div>
+            <!-- Analytics Script (blocked until consent) -->
+            <script type="text/plain" data-consent="analytics" src="./scripts/analytics-demo.js"></script>
+
+            <!-- Marketing Script (blocked until consent) -->
+            <script type="text/plain" data-consent="marketing" src="./scripts/marketing-demo.js"></script>
+
+            <!-- Necessary Script (always runs when consent given) -->
+            <script type="text/plain" data-consent="necessary" src="./scripts/necessary-demo.js"></script>
+
+            <!-- External Analytics Script (simulates real external dependency) -->
+            <script type="text/plain" data-consent="analytics" src="./scripts/external-analytics.js"></script>
+
+            <!-- Additional Real-World Examples -->
+
+            <!-- Google Analytics Example (commented out, but shows real usage) -->
+            <!-- 
+            <script type="text/plain" data-consent="analytics" async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+            <script type="text/plain" data-consent="analytics">
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'GA_MEASUREMENT_ID');
+            </script>
+            -->
+
+            <!-- Facebook Pixel Example (commented out, but shows real usage) -->
+            <!--
+            <script type="text/plain" data-consent="marketing">
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', 'YOUR_PIXEL_ID');
+                fbq('track', 'PageView');
+            </script>
+            -->
+            <div
+                style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 6px; border-left: 4px solid #ffc107;">
+                <strong>💡 How it works:</strong><br>
+                1. Scripts with <code>type="text/plain"</code> and <code>data-consent="category"</code> are
+                <strong>completely blocked</strong> by the browser<br>
+                2. When consent is given, the component finds these scripts and replaces them with executable
+                versions<br>
+                3. The new scripts run immediately after being activated<br>
+                4. Check your browser console to see scripts only load when you grant consent!<br><br>
+                <strong>🔍 To verify:</strong> Clear consent, check console (no messages), then grant consent and watch
+                scripts activate.<br><br>
+                <strong>🌐 External Scripts:</strong> Notice how external script files are not even requested by the
+                browser until consent is granted - check the Network tab!<br><br>
+                <strong>📋 Real-world usage:</strong> The commented examples show how to integrate Google Analytics and
+                Facebook Pixel using this pattern.
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Event Listeners</h2>
+            <p>Listen for consent changes in your application:</p>
+            <pre><code>document.addEventListener('consent-changed', (event) => {
+  console.log('Consent updated:', event.detail);
+});</code></pre>
+
+            <div id="event-log"
+                style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; max-height: 200px; overflow-y: auto;">
+                <strong>Event Log:</strong><br>
+            </div>
+        </div>
+    </div>
+
+    <!-- The actual cookie consent component with API configuration -->
+    <cookie-consent api-url="http://localhost:5220" cookie-name="consent-cookie"></cookie-consent>
+
+    <!-- Demo functionality - external script for cleaner DevTools debugging -->
+    <script src="./demo.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,4 @@
+api/bin/**
+api/obj/**
+**/node_modules/**
+**/dist/**
