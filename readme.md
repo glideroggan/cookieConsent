@@ -2,8 +2,8 @@
 ![npm](https://img.shields.io/npm/v/cookie-consent?style=flat-square)
 ![npm bundle size](https://img.shields.io/bundlephobia/min/cookie-consent?style=flat-square)
 ![npm](https://img.shields.io/npm/dt/cookie-consent?style=flat-square)
-![GitHub](https://img.shields.io/github/license/glideroggan/cookie-consent?style=flat-square)
-![GitHub last commit](https://img.shields.io/github/last-commit/glideroggan/cookie-consent?style=flat-square)
+![GitHub](https://img.shields.io/github/license/glideroggan/cookieConsent?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/glideroggan/cookieConsent?style=flat-square)
 
 - Webcomponent
 - Vanilla typescript
@@ -49,5 +49,6 @@ flowchart TD
 
 
 # TODO
+- add the fallback categories in the slot of the element, so that users can specify fallback categories in the consent form
 - Look into what we need to do to cover all the scripts in a page, because "document.querySelectorAll('script[data-consent]')" will not cover all cases
 - mock up the actual consent form, in a stand alone html file

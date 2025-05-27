@@ -1,0 +1,11 @@
+src/
+*.ts
+!*.d.ts
+tsconfig.json
+yarn.lock
+package-lock.json
+node_modules/
+.git/
+.vscode/
+.env*
+*.log

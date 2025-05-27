@@ -1,6 +1,6 @@
 {
   "name": "@glideroggan/cookie-consent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A vanilla TypeScript web component for GDPR-compliant cookie consent management",
   "type": "module",
   "main": "./dist/cookie-consent.js",
@@ -21,9 +21,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/glideroggan/cookie-consent.git"
+    "url": "https://github.com/glideroggan/cookieConsent.git"
   },
-  "homepage": "https://github.com/glideroggan/cookie-consent#readme",
+  "homepage": "https://github.com/glideroggan/cookieConsent#readme",
   "scripts": {
     "dev": "esbuild src/index.ts --bundle --sourcemap --outfile=dist/cookie-consent.js --watch --format=esm",
     "build": "yarn build:esm && yarn build:umd && yarn build:types",
