@@ -1,21 +1,29 @@
-# Cookie Consent
-![npm](https://img.shields.io/npm/v/cookie-consent?style=flat-square)
-![npm bundle size](https://img.shields.io/bundlephobia/min/cookie-consent?style=flat-square)
-![npm](https://img.shields.io/npm/dt/cookie-consent?style=flat-square)
+# 🍪 Cookie Consent Component
+
+![npm](https://img.shields.io/npm/v/@glideroggan/cookie-consent?style=flat-square)
+![npm bundle size](https://img.shields.io/bundlephobia/min/@glideroggan/cookie-consent?style=flat-square)
+![npm](https://img.shields.io/npm/dt/@glideroggan/cookie-consent?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/glideroggan/cookieConsent?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/glideroggan/cookieConsent?style=flat-square)
 
-- Webcomponent
-- Vanilla typescript
-- esbuild
+A GDPR-compliant cookie consent web component that **actually blocks scripts** until consent is granted.
 
-- Should be able to be added through normal npm install
-- 1 part web
-- 1 part api with sqlite db
+## 🚀 [Live Demo](https://glideroggan.github.io/cookieConsent/)
+
+Try the interactive demo to see how scripts are truly blocked and enabled based on user consent.
+
+## ✨ Features
+
+- **🚫 True Script Blocking** - Scripts with `type="text/plain"` are completely blocked by the browser
+- **⚡ Zero Dependencies** - Pure vanilla TypeScript web component  
+- **🎨 Fully Customizable** - Style and configure to match your brand
+- **📱 Mobile Friendly** - Responsive design that works on all devices
+- **🔧 Easy Integration** - Works with Google Analytics, Facebook Pixel, and any tracking script
+- **🌐 API Integration** - Optional backend API for centralized consent management
 
 # Usage
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/cookie-consent@latest/dist/cookie-consent.js"></script>
+<script type="module" src="https://unpkg.com/@glideroggan/cookie-consent/dist/cookie-consent.esm.js"></script>
 ```
 - will create its own element `<cookie-consent></cookie-consent>`
 - all script tags that should be blocked, should have their type set to `text/plain`, and the `data-consent` attribute set to the catorgory of the script, e.g. `data-consent="analytics"`.
@@ -49,6 +57,12 @@ flowchart TD
 
 
 # TODO
+- need middleware for reporting cookies being created on server sides
+- need more endpoints for managing consent data
+    - adding/removing/editing consent categories
+    - changing overall text of the consent form
+- we need some way to show the entire list of the cookies
+- more languages
 - add the fallback categories in the slot of the element, so that users can specify fallback categories in the consent form
 - Look into what we need to do to cover all the scripts in a page, because "document.querySelectorAll('script[data-consent]')" will not cover all cases
 - mock up the actual consent form, in a stand alone html file
