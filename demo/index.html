@@ -89,23 +89,22 @@
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
-        }
-
-        .status.pending {
+        }        .status.pending {
             background: #fff3cd;
             color: #856404;
             border: 1px solid #ffeaa7;
         }
-    </style> <!-- Mock API for demo -->
-
-    <!-- Cookie Consent Component - served locally from dist -->
-    <!-- <script src="./cookie-consent.js"></script> -->
-    <script type="module" src="https://unpkg.com/@glideroggan/cookie-consent/dist/cookie-consent.esm.js"></script>
+    </style><!-- Mock API for demo -->    <!-- Cookie Consent Component - served locally from dist -->
+    <script src="./cookie-consent.js"></script>
+    <!-- <script type="module" src="https://unpkg.com/@glideroggan/cookie-consent/dist/cookie-consent.esm.js"></script> -->
 </head>
 
 <body>
-    <div class="container">
-        <h1>🍪 Cookie Consent Demo</h1>
+    <div class="container">        <h1>🍪 Cookie Consent Demo</h1>
+          <div style="margin: 20px 0; padding: 15px; background: #e7f3ff; border-radius: 6px; border-left: 4px solid #007bff;">
+            <strong>🛠️ Admin Panel:</strong> <a href="admin.html" style="color: #007bff; text-decoration: none; font-weight: bold;">Manage Categories & Cookies</a>
+            <span style="color: #666; margin-left: 10px;">(Internal company use - manage consent content)</span>
+        </div>
 
         <div class="demo-section">
             <h2>Basic Usage</h2>
@@ -235,12 +234,8 @@
                 <strong>Event Log:</strong><br>
             </div>
         </div>
-    </div>
-
-    <!-- The actual cookie consent component with API configuration -->
-    <cookie-consent api-url="http://localhost:5220" cookie-name="consent-cookie"></cookie-consent>
-
-    <!-- Demo functionality - external script for cleaner DevTools debugging -->
+    </div>    <!-- The actual cookie consent component with API configuration -->
+    <cookie-consent api-url="http://localhost:5220" cookie-name="consent-cookie"></cookie-consent>    <!-- Demo functionality - external script for cleaner DevTools debugging -->
     <script src="./demo.js"></script>
 </body>
 

@@ -1,10 +1,19 @@
 
+using Microsoft.EntityFrameworkCore;
+using Api.Data;
+using Api.Admin;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add CORS support for the demo
+// Add Entity Framework with SQLite
+builder.Services.AddDbContext<ConsentDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
+        ?? "Data Source=consent.db"));
+
+// Add CORS support for the demo and admin panel
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowDemo", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
@@ -15,64 +24,17 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Enable CORS
-app.UseCors("AllowDemo");
+app.UseCors("AllowAll");
 
-// API endpoints
-app.MapGet("/", () => "Cookie Consent API");
-app.MapGet("/consent", () => ConsentService.GetConsent());
+// Ensure database is created and seeded
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ConsentDbContext>();
+    context.Database.EnsureCreated();
+}
+
+// Legacy endpoint for existing demo
+app.MapGet("/consent", async (ConsentDbContext db) => await ConsentService.GetConsentAsync(db));
+app.MapGroup("/api/admin").MapAdminEndpoints();
 
 app.Run();
-
-// Models matching the TypeScript interfaces
-public class ConsentResponse
-{
-    public string Version { get; set; } = "1.0";
-    public ConsentCategory[] Categories { get; set; } = [];
-}
-
-public class ConsentCategory
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public bool Required { get; set; }
-    public bool Enabled { get; set; }
-}
-
-public static class ConsentService
-{
-    public static ConsentResponse GetConsent()
-    {
-        return new ConsentResponse
-        {
-            Version = "1.3",
-            Categories =
-            [
-                new ConsentCategory
-                {
-                    Id = "necessary",
-                    Name = "Necessary",
-                    Description = "Required for basic site functionality",
-                    Required = true,
-                    Enabled = true
-                },
-                new ConsentCategory
-                {
-                    Id = "analytics",
-                    Name = "Analytics",
-                    Description = "Help us understand how you use our site",
-                    Required = false,
-                    Enabled = false
-                },
-                new ConsentCategory
-                {
-                    Id = "marketing",
-                    Name = "Marketing",
-                    Description = "Used to deliver relevant ads and content to you",
-                    Required = false,
-                    Enabled = false
-                }
-            ]
-        };
-    }
-}

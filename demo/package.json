@@ -4,14 +4,16 @@
   "main": "./src/app.ts",
   "module": "esm",
   "license": "MIT",  "scripts": {
-    "dev": "yarn build:component && yarn build:demo && yarn serve",
-    "dev:watch": "yarn build:component:watch",
-    "build": "yarn build:component && yarn build:demo",
-    "build:component": "cd ../web && yarn build",
-    "build:component:watch": "cd ../web && yarn dev",
-    "build:demo": "yarn copy:files",
-    "copy:files": "pwsh -Command \"if (!(Test-Path 'dist')) { New-Item -ItemType Directory -Path 'dist' }; Copy-Item 'index.html' 'dist/' -Force; Copy-Item 'demo.js' 'dist/' -Force; Copy-Item '../web/dist/cookie-consent.js' 'dist/' -Force; if (Test-Path 'scripts') { Copy-Item 'scripts' 'dist/' -Recurse -Force }\"",    "serve": "npx http-server dist -p 3001 -o",
-    "serve:watch": "npx http-server dist -p 3000 -o --watch",
+    "dev": "yarn build && yarn serve:watch",
+    "dev:clean": "yarn clean && yarn dev",    "build": "yarn build:component && yarn build:demo",
+    "build:component": "cd ../web && yarn build && yarn copy:demo",
+    "build:demo": "yarn copy:files && node build-admin.mjs demo dist",
+    "build:admin": "yarn build:admin:clean && node build-admin.mjs standalone admin-dist",
+    "build:admin:clean": "pwsh -Command \"if (Test-Path 'admin-dist') { Remove-Item -Recurse -Force 'admin-dist' }; New-Item -ItemType Directory -Path 'admin-dist'\"",
+    "copy:files": "pwsh -Command \"if (!(Test-Path 'dist')) { New-Item -ItemType Directory -Path 'dist' }; Copy-Item 'index.html' 'dist/' -Force; Copy-Item 'demo.js' 'dist/' -Force; if (Test-Path 'scripts') { Copy-Item 'scripts' 'dist/' -Recurse -Force }\"",
+    "serve": "npx http-server dist -p 3001 -c-1",
+    "serve:watch": "npx http-server dist -p 3001 -c-1 -o",
+    "serve:admin": "npx http-server admin-dist -p 3002 -c-1 -o",
     "serve:simple": "node serve.mjs",
     "clean": "pwsh -Command \"if (Test-Path 'dist') { Remove-Item -Recurse -Force 'dist' }\""
   },
@@ -22,6 +24,5 @@
     "http-server": "^14.1.1",
     "typescript": "^5.4.5"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

@@ -1,15 +1,12 @@
 import { ConsentCategory } from './cookie-consent.component';
 
-export function getConsentTemplate(categories: ConsentCategory[]): string {
+export function getConsentTemplate(categories: ConsentCategory[], description?: string): string {
   return `
     <dialog class="consent-dialog" id="consent-dialog">
       <div class="consent-container">
         <div class="consent-header">
           <div class="consent-title">Cookie Preferences</div>
-          <div class="consent-description">
-            We use cookies to enhance your browsing experience and analyze our traffic. 
-            Please choose which types of cookies you want to allow.
-          </div>
+          <div class="consent-description">${description}</div>
         </div>
         
         <div class="consent-categories">

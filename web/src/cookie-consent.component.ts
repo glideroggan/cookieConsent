@@ -9,6 +9,7 @@ export interface ConsentConfig {
 
 interface ApiResponse {
     version: string;
+    description?: string;
     categories: ConsentCategory[];
 }
 
@@ -75,36 +76,16 @@ export class CookieConsentComponent extends HTMLElement {
             // TODO: first, do we have a cookie?
             const localConsent = this.getLocalConsent();
             this.apiData = await this.fetchApiConsent();
-            this.config.categories = this.apiData?.categories || this.config.categories;
-
-            if (this.apiData && localConsent) {
-                console.log('Both local and API consent data available')
-                // compare versions
+            this.config.categories = this.apiData?.categories || this.config.categories;            if (this.apiData && localConsent) {
                 if (this.isConsentOutdated(localConsent, this.apiData)) {
-                    console.log('Local consent is outdated, showing banner');
                     this.showConsentBanner();
                     return;
                 }
-                console.log('Local consent is up-to-date, enabling scripts based on consent');
                 this.enableScriptsBasedOnConsent();
-            }
-            // If no local consent, show banner
-            if (!localConsent && !this.apiData) {
-                console.log('No local consent and no API data, showing consent banner');
+            } else if (!localConsent) {
                 this.showConsentBanner();
-                return;
-            }
-            // we have local, but no api data
-            if (localConsent && !this.apiData) {
-                console.log('Local consent available but no API data, enabling scripts based on local consent');
+            } else {
                 this.enableScriptsBasedOnConsent();
-                return;
-            }
-            // no local consent, but api data available
-            if (!localConsent && this.apiData) {
-                console.log('No local consent but API data available, showing consent banner');
-                this.showConsentBanner();
-                return;
             }
         } catch (error) {
             console.warn('Cookie consent API error:', error);
@@ -116,22 +97,12 @@ export class CookieConsentComponent extends HTMLElement {
                 this.enableScriptsBasedOnConsent();
             }
         }
-    }
-
-    private async fetchApiConsent(): Promise<ApiResponse> {
-        console.log('Fetching consent data from API:', this.config.apiUrl);
+    }    private async fetchApiConsent(): Promise<ApiResponse> {
         if (!this.config.apiUrl) throw new Error('No API URL configured');
-
         const response = await fetch(`${this.config.apiUrl}/consent`);
         if (!response.ok) throw new Error('API request failed');
-
-        const a = await response.json();
-        console.log('API consent data:', a);
-        return a as ApiResponse;
-    }
-
-    private getLocalConsent(): ConsentData | null {
-        console.log('Getting local consent from cookie:', this.config.cookieName);
+        return await response.json() as ApiResponse;
+    }    private getLocalConsent(): ConsentData | null {
         const cookie = document.cookie
             .split('; ')
             .find(row => row.startsWith(`${this.config.cookieName}=`));
@@ -192,10 +163,9 @@ export class CookieConsentComponent extends HTMLElement {
 
     private showConsentBanner() {
         // Apply existing consent data to categories before rendering
-        const existingConsent = this.getLocalConsent();
-        const isAnUpdatedVersion = this.apiData && existingConsent && this.isConsentOutdated(existingConsent, this.apiData);
+        const existingConsent = this.getLocalConsent();        const isAnUpdatedVersion = this.apiData && existingConsent && this.isConsentOutdated(existingConsent, this.apiData);
+
         if (isAnUpdatedVersion) {
-            console.log('Consent data is outdated, updating categories from API');
             this.config.categories = this.apiData!.categories;
         }
 
@@ -206,7 +176,7 @@ export class CookieConsentComponent extends HTMLElement {
                 category.enabled
         }));
 
-        const template = getConsentTemplate(categoriesToRender);
+        const template = getConsentTemplate(categoriesToRender, this.apiData?.description);
         const styles = getConsentStyles();
 
         this.shadow.innerHTML = `
@@ -214,9 +184,7 @@ export class CookieConsentComponent extends HTMLElement {
             ${template}
         `;
 
-        this.attachEventListeners();
-
-        // Lock body scroll before showing dialog
+        this.attachEventListeners();        // Lock body scroll before showing dialog
         this.lockBodyScroll();
 
         // Show the dialog as modal
@@ -285,13 +253,10 @@ export class CookieConsentComponent extends HTMLElement {
     private saveConsent(consent: ConsentData) {
         const cookieValue = encodeURIComponent(JSON.stringify(consent));
         const expires = new Date();
-        expires.setFullYear(expires.getFullYear() + 1);
-
-        document.cookie = `${this.config.cookieName}=${cookieValue}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+        expires.setFullYear(expires.getFullYear() + 1);        document.cookie = `${this.config.cookieName}=${cookieValue}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
 
         // Dispatch custom event
         this.dispatchEvent(new CustomEvent('consent-updated', { detail: consent, bubbles: true, composed: true }));
-        console.log('Consent saved:', consent);
     }
 
     private enableScriptsBasedOnConsent() {

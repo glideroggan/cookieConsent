@@ -4,7 +4,7 @@ import { resolve, extname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const port = 3000;
+const port = process.argv.includes('--port') ? parseInt(process.argv[process.argv.indexOf('--port') + 1]) || 3000 : 3001;
 
 const mimeTypes = {
   '.html': 'text/html',

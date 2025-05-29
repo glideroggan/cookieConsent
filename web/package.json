@@ -23,19 +23,22 @@
     "type": "git",
     "url": "https://github.com/glideroggan/cookieConsent.git"
   },
-  "homepage": "https://github.com/glideroggan/cookieConsent#readme",
-  "scripts": {
+  "homepage": "https://github.com/glideroggan/cookieConsent#readme",  "scripts": {
     "dev": "esbuild src/index.ts --bundle --sourcemap --outfile=dist/cookie-consent.js --watch --format=esm",
-    "build": "yarn build:esm && yarn build:umd && yarn build:types",
-    "build:esm": "esbuild src/index.ts --bundle --minify --outfile=dist/cookie-consent.esm.js --format=esm",
-    "build:umd": "esbuild src/index.ts --bundle --minify --outfile=dist/cookie-consent.js --format=iife --global-name=CookieConsent",
+    "dev:demo": "yarn build && yarn copy:demo && yarn dev:watch",
+    "dev:watch": "esbuild src/index.ts --bundle --sourcemap --outfile=dist/cookie-consent.js --watch --format=esm && yarn copy:demo:watch",
+    "build": "node esbuild.config.js && yarn build:types",
     "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
+    "copy:demo": "pwsh -Command \"if (!(Test-Path '../demo/dist')) { New-Item -ItemType Directory -Path '../demo/dist' }; Copy-Item 'dist/cookie-consent.js' '../demo/dist/' -Force\"",
+    "copy:demo:watch": "pwsh -Command \"while ($true) { Start-Sleep 1; if (Test-Path 'dist/cookie-consent.js') { Copy-Item 'dist/cookie-consent.js' '../demo/dist/' -Force -ErrorAction SilentlyContinue } }\"",
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
+    "@parcel/css": "^1.14.0",
     "esbuild": "^0.25.0",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-tsc": "^0.4.0",
+    "lightningcss": "^1.30.1",
     "typescript": "^5.4.5"
   },
   "dependencies": {},
