@@ -1,0 +1,22 @@
+{
+  "name": "cookie-consent-admin",
+  "version": "1.0.0",
+  "description": "Standalone Cookie Consent Admin Panel",
+  "main": "index.html",
+  "scripts": {
+    "serve": "npx http-server . -p 3000 -c-1 -o",
+    "start": "npm run serve"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "cookie",
+    "consent",
+    "gdpr",
+    "admin",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "MIT"
+}

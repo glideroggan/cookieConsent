@@ -1,0 +1,29 @@
+services:
+  # Cookie Consent API
+  api:
+    image: docker.io/glideroggan/cookie-consent-api:latest
+    build:
+      context: ./api
+      dockerfile: dockerfile
+    container_name: cookie-consent-api
+    ports:
+      - "5220:5220"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5220
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/consent.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  # Web Component + Admin Panel Server (nginx)
+  web:
+    build:
+      context: .  # Build from root to access demo/ folder
+      dockerfile: ./web/dockerfile
+    container_name: cookie-consent-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped

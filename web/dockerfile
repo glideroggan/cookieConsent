@@ -1,0 +1,36 @@
+# Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Copy web package files
+COPY web/package.json web/yarn.lock ./
+RUN yarn install
+
+# Copy web source code and build
+COPY web/ .
+RUN yarn build
+
+# Production stage with nginx
+FROM nginx:alpine AS production
+WORKDIR /usr/share/nginx/html
+
+# Remove default nginx files
+RUN rm -rf ./*
+
+# Copy built web component files
+COPY --from=builder /app/dist ./
+
+# Copy pre-built admin panel from demo folder
+COPY demo/admin-dist ./admin/
+
+# Copy index.html
+COPY web/index.html ./
+
+# Create Docker-specific admin config
+RUN echo 'window.COOKIE_CONSENT_CONFIG = { apiUrl: "http://localhost:5220/api/admin" }; console.log("🍪 Cookie Consent Admin Panel loaded for Docker"); console.log("📡 API URL:", window.COOKIE_CONSENT_CONFIG.apiUrl);' > ./admin/config.js
+
+# Copy custom nginx config
+COPY web/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

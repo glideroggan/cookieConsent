@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Consent Component</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .files {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .file-link {
+            display: block;
+            color: #0066cc;
+            text-decoration: none;
+            padding: 5px 0;
+            font-family: monospace;
+        }
+        .file-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍪 Cookie Consent Component</h1>
+      <div class="container">
+        <h2>Available Services</h2>
+        <div class="files">
+            <h3>Component Files:</h3>
+            <a href="/cookie-consent.js" class="file-link">cookie-consent.js</a>
+            <a href="/cookie-consent.esm.js" class="file-link">cookie-consent.esm.js</a>
+            
+            <h3>Admin Panel:</h3>
+            <a href="/admin/" class="file-link" style="font-weight: bold; color: #0066cc;">🛠️ Admin Panel</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Usage</h2>
+        <p>Include the component in your HTML:</p>
+        <pre><code>&lt;script type="module" src="http://localhost:8080/cookie-consent.esm.js"&gt;&lt;/script&gt;
+&lt;cookie-consent api-url="http://localhost:5220/api" cookie-name="my-consent"&gt;&lt;/cookie-consent&gt;</code></pre>
+    </div>
+
+    <div class="container">
+        <h2>API Status</h2>
+        <p>API Server: <span id="api-status">Checking...</span></p>
+        <p>API URL: <a href="http://localhost:5220/api/admin/global-config" target="_blank">http://localhost:5220/api/admin/global-config</a></p>
+    </div>
+
+    <script>
+        // Check API status
+        fetch('http://localhost:5220/api/admin/global-config')
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('api-status').textContent = '✅ Running';
+                    document.getElementById('api-status').style.color = 'green';
+                } else {
+                    throw new Error('API not responding');
+                }
+            })
+            .catch(error => {
+                document.getElementById('api-status').textContent = '❌ Not running';
+                document.getElementById('api-status').style.color = 'red';
+            });
+    </script>
+</body>
+</html>

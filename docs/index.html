@@ -348,7 +348,8 @@
     <div class="hero">
         <h1>🍪 Cookie Consent Component</h1>
         <p>A GDPR-compliant web component that actually blocks scripts until consent is given</p>
-        <div class="links">
+        <div class="links">                <a href="./admin/" class="btn btn-secondary">🛠️ Admin Panel</a>
+
             <a href="https://github.com/glideroggan/cookieConsent" target="_blank">📁 GitHub</a>
             <a href="https://www.npmjs.com/package/@glideroggan/cookie-consent" target="_blank">📦 npm</a>
             <a href="#demo" onclick="switchTab('demo')">🎮 Live Demo</a>
@@ -762,7 +763,7 @@ consentElement.addEventListener('ready', () => {
         </div>
     </div>    <!-- Cookie Consent Component -->
     <!-- 
-    Replace "https://your-api-server.com/api" with your actual API URL when you host it
+    TODO: Replace "https://your-api-server.com/api" with your actual API URL when you host it
     For testing without API, you can remove the api-url attribute entirely
     -->
     <cookie-consent api-url="https://your-api-server.com/api" cookie-name="demo-consent"></cookie-consent>
