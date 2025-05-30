@@ -31,7 +31,12 @@ public static class AdminEndpoints
 }
 
 public static class Endpoints
-{    // Categories
+{
+    // Configuration limits
+    private const int MaxCategories = 10;
+    private const int MaxCookies = 100;
+
+    // Categories
     public static async Task<IResult> GetCategories(ConsentDbContext db)
     {
         var categories = await db.Categories
@@ -48,10 +53,12 @@ public static class Endpoints
             })
             .ToListAsync();
         return Results.Ok(categories);
-    }
+    }    public static async Task<IResult> CreateCategory(Category category, ConsentDbContext db)
+    {        // Check category limit (max 10)
+        var categoryCount = await db.Categories.CountAsync();
+        if (categoryCount >= MaxCategories)
+            return Results.BadRequest(new { message = $"Maximum of {MaxCategories} categories allowed" });
 
-    public static async Task<IResult> CreateCategory(Category category, ConsentDbContext db)
-    {
         // Check for duplicate key
         if (await db.Categories.AnyAsync(c => c.Key == category.Key))
             return Results.BadRequest(new { message = "Category key already exists" });
@@ -120,10 +127,12 @@ public static class Endpoints
             })
             .ToListAsync();
         return Results.Ok(cookies);
-    }
+    }    public static async Task<IResult> CreateCookieDetail(CookieDetail cookie, ConsentDbContext db)
+    {        // Check cookie limit (max 100 total)
+        var cookieCount = await db.CookieDetails.CountAsync();
+        if (cookieCount >= MaxCookies)
+            return Results.BadRequest(new { message = $"Maximum of {MaxCookies} cookies allowed" });
 
-    public static async Task<IResult> CreateCookieDetail(CookieDetail cookie, ConsentDbContext db)
-    {
         // Check if category exists
         if (!await db.Categories.AnyAsync(c => c.Id == cookie.CategoryId))
             return Results.BadRequest(new { message = "Category does not exist" });
@@ -234,10 +243,18 @@ public static class Endpoints
         };
 
         return Results.Ok(export);
-    }
-
-    public static async Task<IResult> ImportConfig(ImportData import, ConsentDbContext db)
+    }    public static async Task<IResult> ImportConfig(ImportData import, ConsentDbContext db)
     {
+        // Validate limits before importing
+        if (import.Categories != null)
+        {            if (import.Categories.Count > MaxCategories)
+                return Results.BadRequest(new { message = $"Import contains more than {MaxCategories} categories (limit: {MaxCategories})" });
+
+            var totalCookies = import.Categories.Sum(c => c.CookieDetails.Count);
+            if (totalCookies > MaxCookies)
+                return Results.BadRequest(new { message = $"Import contains {totalCookies} cookies (limit: {MaxCookies})" });
+        }
+
         // Clear existing data
         db.CookieDetails.RemoveRange(db.CookieDetails);
         db.Categories.RemoveRange(db.Categories);

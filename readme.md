@@ -59,15 +59,13 @@ flowchart TD
 - removing a category and then switching over to global config, then the version is still lagging behind
 
 # TODO
+- we should clean up the workspace
 - we should do some sanity checks on the api
   - throttle number of post and put requests
-  - restrict the inputs to not create overly long strings
-  - restrict the maximum number of categories and cookies
-- don't forgget that the admin part of the api should be used with an api key
-  Do we really need this?
+  - ✔️restrict the inputs to not create overly long strings
+  - ✔️restrict the maximum number of categories and cookies
 - need middleware for reporting cookies being created on server sides
 - we need some way to show the entire list of the cookies
 - more languages
 - add the fallback categories in the slot of the element, so that users can specify fallback categories in the consent form
 - Look into what we need to do to cover all the scripts in a page, because "document.querySelectorAll('script[data-consent]')" will not cover all cases
-- mock up the actual consent form, in a stand alone html file
