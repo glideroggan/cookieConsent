@@ -70,6 +70,7 @@ flowchart TD
 
 # TODO
 - don't forgget that the admin part of the api should be used with an api key
+  Do we really need this?
 - need middleware for reporting cookies being created on server sides
 - we need some way to show the entire list of the cookies
 - more languages

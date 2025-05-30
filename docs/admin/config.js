@@ -10,7 +10,7 @@ window.COOKIE_CONSENT_CONFIG = {
     // Example: 'https://your-api.azurewebsites.net/api/admin'
     // Example: 'https://your-api.herokuapp.com/api/admin'
     // Example: 'https://api.yourdomain.com/api/admin'
-    apiUrl: 'https://your-api-server.com/api/admin'
+    apiUrl: 'https://nyviken.se/consent-api/api/admin'
     
     // For local testing, uncomment this line:
     // apiUrl: 'http://localhost:5220/api/admin'

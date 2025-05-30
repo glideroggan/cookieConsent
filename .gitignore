@@ -2,3 +2,5 @@ api/bin/**
 api/obj/**
 **/node_modules/**
 **/dist/**
+**/consent.db
+**/*dist/**
