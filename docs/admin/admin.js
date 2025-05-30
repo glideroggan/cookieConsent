@@ -15,10 +15,9 @@ let cookieDetails = [];
 document.addEventListener('DOMContentLoaded', async () => {
     // Show loading state
     showAlert('Loading admin panel...', 'info');
-    
-    try {
-        // Test API connection first
-        await fetch(`${API_BASE_URL}/global-config`);
+      try {
+        // Test API connection first using the proper API request function
+        await apiRequest('/global-config');
         
         await loadGlobalConfig();
         await loadCategories();
@@ -51,7 +50,14 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include credentials for CORS with API key
     };
+    
+    // Add API key if available
+    const apiKey = window.COOKIE_CONSENT_CONFIG?.apiKey;
+    if (apiKey) {
+        options.headers['X-API-Key'] = apiKey;
+    }
     
     if (body) {
         options.body = JSON.stringify(body);

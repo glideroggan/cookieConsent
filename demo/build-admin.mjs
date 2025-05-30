@@ -55,26 +55,40 @@ function buildAdmin(target = 'standalone', outputDir = 'admin-dist') {
     // Read the original admin.js file
     const adminJsPath = resolve('admin.js');
     let adminJs = readFileSync(adminJsPath, 'utf8');
-    
-    // Process JS based on target
+      // Process JS based on target
     if (isStandalone) {
         // Replace hardcoded API URL with configurable one for standalone
         adminJs = adminJs.replace(
-            /const API_BASE_URL = 'http:\/\/localhost:5220\/api\/admin';/,
+            /const API_BASE_URL = window\.COOKIE_CONSENT_CONFIG\?\.apiUrl \|\| 'http:\/\/localhost:5220\/api\/admin';/,
             `// API Configuration - Update this to point to your Cookie Consent API
 const API_BASE_URL = window.COOKIE_CONSENT_CONFIG?.apiUrl || 'http://localhost:5220/api/admin';`
+        );
+        
+        // Replace hardcoded API key with configurable one for standalone
+        adminJs = adminJs.replace(
+            /const API_KEY = window\.COOKIE_CONSENT_CONFIG\?\.apiKey \|\| 'dev-admin-key-123';/,
+            `const API_KEY = window.COOKIE_CONSENT_CONFIG?.apiKey || 'your-admin-api-key-change-this-in-production';`
         );
     }
     
     // Write the JS file
     writeFileSync(resolve(outputDir, 'admin.js'), adminJs);
     console.log(`✅ Generated admin.js (${target} version)`);
-    
-    // Copy CSS (same for both targets)
+      // Copy CSS (same for both targets)
     const adminCssPath = resolve('admin.css');
     const adminCss = readFileSync(adminCssPath, 'utf8');
     writeFileSync(resolve(outputDir, 'admin.css'), adminCss);
     console.log(`✅ Generated admin.css`);
+    
+    // Copy config.js if it exists (for demo target)
+    if (!isStandalone) {
+        const configJsPath = resolve('config.js');
+        if (existsSync(configJsPath)) {
+            const configJs = readFileSync(configJsPath, 'utf8');
+            writeFileSync(resolve(outputDir, 'config.js'), configJs);
+            console.log(`✅ Copied config.js`);
+        }
+    }
     
     if (isStandalone) {
         // Generate standalone-specific files
@@ -95,12 +109,25 @@ function generateStandaloneFiles(outputDir) {    const configJs = `/**
  */
 
 window.COOKIE_CONSENT_CONFIG = {
-    // Update this URL to point to your Cookie Consent API server
-    apiUrl: 'http://localhost:5220/api/admin'
+    // 🚨 IMPORTANT: Update this URL to your actual API server
+    // Example: 'https://your-api.azurewebsites.net/api/admin'
+    // Example: 'https://your-api.herokuapp.com/api/admin'
+    // Example: 'https://api.yourdomain.com/api/admin'
+    apiUrl: 'http://localhost:5220/api/admin',
     
-    // Example for production:
-    // apiUrl: 'https://your-api-server.com/api/admin'
+    // 🔐 IMPORTANT: Set your admin API key here
+    // This should match the AdminApiKey in your API server's appsettings.json
+    // For production: Use environment variables or secure configuration
+    apiKey: 'your-admin-api-key-change-this-in-production'
+    
+    // For local testing, use these values:
+    // apiUrl: 'http://localhost:5220/api/admin',
+    // apiKey: 'dev-admin-key-123'
 };
+
+console.log('🍪 Cookie Consent Admin Panel loaded');
+console.log('📡 API URL:', window.COOKIE_CONSENT_CONFIG.apiUrl);
+console.log('🔐 API Key configured:', !!window.COOKIE_CONSENT_CONFIG.apiKey);
 `;
     
     writeFileSync(resolve(outputDir, 'config.js'), configJs);

@@ -1,5 +1,4 @@
-services:
-  # Cookie Consent API
+services:  # Cookie Consent API
   api:
     image: docker.io/glideroggan/cookie-consent-api:latest
     build:
@@ -12,6 +11,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5220
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/consent.db
+      # Security Configuration - Override in production
+      - AdminApiKey=${ADMIN_API_KEY:-your-admin-api-key-change-this-in-production}
+      - AllowedAdminOrigins__0=${ADMIN_ORIGIN_1:-http://localhost:3000}
+      - AllowedAdminOrigins__1=${ADMIN_ORIGIN_2:-http://admin.internal}
     volumes:
       - ./data:/app/data
     restart: unless-stopped

@@ -3,7 +3,8 @@
 // ==========================================
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:5220/api/admin';
+const API_BASE_URL = window.COOKIE_CONSENT_CONFIG?.apiUrl || 'http://localhost:5220/api/admin';
+const API_KEY = window.COOKIE_CONSENT_CONFIG?.apiKey || 'dev-admin-key-123';
 
 // Data containers
 let categories = [];
@@ -14,10 +15,9 @@ let cookieDetails = [];
 document.addEventListener('DOMContentLoaded', async () => {
     // Show loading state
     showAlert('Loading admin panel...', 'info');
-    
-    try {
-        // Test API connection first
-        await fetch(`${API_BASE_URL}/global-config`);
+      try {
+        // Test API connection first using the proper API request function
+        await apiRequest('/global-config');
         
         await loadGlobalConfig();
         await loadCategories();
@@ -50,7 +50,13 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include credentials for CORS with API key
     };
+    
+    // Add API key for admin endpoints
+    if (API_KEY) {
+        options.headers['X-API-Key'] = API_KEY;
+    }
     
     if (body) {
         options.body = JSON.stringify(body);
