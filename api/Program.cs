@@ -67,8 +67,9 @@ app.MapGroup("/api/admin")
         if (string.IsNullOrEmpty(configuredKey) || apiKey != configuredKey)
         {
             context.HttpContext.Response.StatusCode = 401;
-            await context.HttpContext.Response.WriteAsync("Unauthorized");
-            return null; // Fixed: return null instead of Results.Unauthorized()
+            // await context.HttpContext.Response.WriteAsync("Unauthorized");
+            // return null; // Fixed: return null instead of Results.Unauthorized()
+            return Results.Unauthorized();
         }
         
         return await next(context);
