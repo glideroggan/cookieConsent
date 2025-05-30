@@ -57,18 +57,12 @@ flowchart TD
 
 # BUGS
 - removing a category and then switching over to global config, then the version is still lagging behind
-- pressing escape key on consent form, closes the form, but doesn't release the scroll lock, so the user can't scroll the page anymore
-
-# Features
-## admin dashboard for managing consent data
-- ✔️Create a simple admin dashboard to view and manage user consent data
-- ✔️need more endpoints for managing consent data
-    - adding/removing/editing consent categories
-    - changing overall text of the consent form
-- a great thing here would be if configuration could be exported and imported, and preferably in a human readable format, this way we could 
-  get version controlled configuration files
 
 # TODO
+- we should do some sanity checks on the api
+  - throttle number of post and put requests
+  - restrict the inputs to not create overly long strings
+  - restrict the maximum number of categories and cookies
 - don't forgget that the admin part of the api should be used with an api key
   Do we really need this?
 - need middleware for reporting cookies being created on server sides

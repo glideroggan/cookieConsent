@@ -20,5 +20,5 @@
     "esModuleInterop": true,
     "paths": {}
   },
-  "include": ["src/**/*", "typings.d.ts", "jest.config.js"]
+  "include": ["./**/*.ts", "./**/*.tsx"]
 }
