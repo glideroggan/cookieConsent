@@ -36,12 +36,11 @@ export class CookieConsentComponent extends HTMLElement {
             { id: 'analytics', name: 'Analytics', description: 'Help us understand how you use our site', required: false, enabled: false },
             { id: 'marketing', name: 'Marketing', description: 'Used to deliver relevant ads', required: false, enabled: false }
         ],
-    };
-
-    private shadow: ShadowRoot;
+    }; private shadow: ShadowRoot;
     private apiData: ApiResponse | null = null;
     private originalBodyOverflow: string = '';
     private originalBodyPaddingRight: string = '';
+    private isScrollLocked: boolean = false;
 
     public get cookieName(): string {
         return this.config.cookieName || 'cookie-consent';
@@ -76,7 +75,7 @@ export class CookieConsentComponent extends HTMLElement {
             // TODO: first, do we have a cookie?
             const localConsent = this.getLocalConsent();
             this.apiData = await this.fetchApiConsent();
-            this.config.categories = this.apiData?.categories || this.config.categories;            if (this.apiData && localConsent) {
+            this.config.categories = this.apiData?.categories || this.config.categories; if (this.apiData && localConsent) {
                 if (this.isConsentOutdated(localConsent, this.apiData)) {
                     this.showConsentBanner();
                     return;
@@ -97,12 +96,16 @@ export class CookieConsentComponent extends HTMLElement {
                 this.enableScriptsBasedOnConsent();
             }
         }
-    }    private async fetchApiConsent(): Promise<ApiResponse> {
+    }
+    
+    private async fetchApiConsent(): Promise<ApiResponse> {
         if (!this.config.apiUrl) throw new Error('No API URL configured');
         const response = await fetch(`${this.config.apiUrl}/consent`);
         if (!response.ok) throw new Error('API request failed');
         return await response.json() as ApiResponse;
-    }    private getLocalConsent(): ConsentData | null {
+    }
+    
+    private getLocalConsent(): ConsentData | null {
         const cookie = document.cookie
             .split('; ')
             .find(row => row.startsWith(`${this.config.cookieName}=`));
@@ -119,8 +122,10 @@ export class CookieConsentComponent extends HTMLElement {
     private isConsentOutdated(local: ConsentData, api: any): boolean {
         return api.version && local.version !== api.version;
     }
-
+    
     private lockBodyScroll() {
+        if (this.isScrollLocked) return; // Already locked
+
         // Store original styles
         this.originalBodyOverflow = document.body.style.overflow;
         this.originalBodyPaddingRight = document.body.style.paddingRight;
@@ -136,8 +141,9 @@ export class CookieConsentComponent extends HTMLElement {
 
         // Add keyboard event listener to prevent scroll-related keys
         document.addEventListener('keydown', this.handleKeyDown, true);
-    }
 
+        this.isScrollLocked = true;
+    }
     private unlockBodyScroll() {
         // Restore original styles
         document.body.style.overflow = this.originalBodyOverflow;
@@ -145,6 +151,9 @@ export class CookieConsentComponent extends HTMLElement {
 
         // Remove keyboard event listener
         document.removeEventListener('keydown', this.handleKeyDown, true);
+
+        // Reset the scroll lock state
+        this.isScrollLocked = false;
     }
 
     private handleKeyDown = (event: KeyboardEvent) => {
@@ -163,7 +172,7 @@ export class CookieConsentComponent extends HTMLElement {
 
     private showConsentBanner() {
         // Apply existing consent data to categories before rendering
-        const existingConsent = this.getLocalConsent();        const isAnUpdatedVersion = this.apiData && existingConsent && this.isConsentOutdated(existingConsent, this.apiData);
+        const existingConsent = this.getLocalConsent(); const isAnUpdatedVersion = this.apiData && existingConsent && this.isConsentOutdated(existingConsent, this.apiData);
 
         if (isAnUpdatedVersion) {
             this.config.categories = this.apiData!.categories;
@@ -192,16 +201,22 @@ export class CookieConsentComponent extends HTMLElement {
         if (dialog) {
             dialog.showModal();
         }
-    }
-
-    private attachEventListeners() {
+    } private attachEventListeners() {
         const acceptBtn = this.shadow.getElementById('accept-btn');
         const declineBtn = this.shadow.getElementById('decline-btn');
         const saveBtn = this.shadow.getElementById('save-btn');
+        const dialog = this.shadow.getElementById('consent-dialog') as HTMLDialogElement;
 
         acceptBtn?.addEventListener('click', () => this.acceptAll());
         declineBtn?.addEventListener('click', () => this.declineAll());
         saveBtn?.addEventListener('click', () => this.savePreferences());
+
+        // Handle dialog close event (includes ESC key press)
+        dialog?.addEventListener('close', () => {
+            // Unlock body scroll when dialog is closed by any means (including ESC)
+            this.unlockBodyScroll();
+            this.style.display = 'none';
+        });
     }
 
     private acceptAll() {
@@ -253,7 +268,7 @@ export class CookieConsentComponent extends HTMLElement {
     private saveConsent(consent: ConsentData) {
         const cookieValue = encodeURIComponent(JSON.stringify(consent));
         const expires = new Date();
-        expires.setFullYear(expires.getFullYear() + 1);        document.cookie = `${this.config.cookieName}=${cookieValue}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+        expires.setFullYear(expires.getFullYear() + 1); document.cookie = `${this.config.cookieName}=${cookieValue}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
 
         // Dispatch custom event
         this.dispatchEvent(new CustomEvent('consent-updated', { detail: consent, bubbles: true, composed: true }));
@@ -303,18 +318,16 @@ export class CookieConsentComponent extends HTMLElement {
                 }
             }));
         }
-    } 
-    private hideBanner() {
+    } private hideBanner() {
         const dialog = this.shadow.getElementById('consent-dialog') as HTMLDialogElement;
         if (dialog && dialog.open) {
-            dialog.close();
+            dialog.close(); // This will trigger the 'close' event listener which handles cleanup
+        } else {
+            // If dialog is not open (edge case), ensure cleanup happens
+            this.unlockBodyScroll();
+            this.style.display = 'none';
         }
-
-        // Unlock body scroll when hiding dialog
-        this.unlockBodyScroll();
-
-        this.style.display = 'none';
-    }  
+    }
     // Public methods for programmatic control
     public showBanner() {
         this.style.display = 'block';
