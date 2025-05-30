@@ -58,7 +58,16 @@ flowchart TD
 # BUGS
 - removing a category and then switching over to global config, then the version is still lagging behind
 
+# FEATURES
+## implement on nyviken.se
+- change name of the demo admin api
+- add another admin api for nyviken.se
+- add the admin web page for nyviken.se
+- add the login component for the admin web page
+- document the cookies we use on nyviken.se
+
 # TODO
+
 - we should clean up the workspace
 - we should do some sanity checks on the api
   - throttle number of post and put requests
