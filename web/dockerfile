@@ -1,4 +1,4 @@
-# Build stage
+# Build web component assets
 FROM node:18-alpine AS builder
 WORKDIR /app
 
@@ -10,6 +10,15 @@ RUN yarn install
 COPY web/ .
 RUN yarn build
 
+# Build the admin panel inside the Docker build so `docker compose build`
+# is self-contained and does not depend on a pre-existing demo/admin-dist
+# folder on the host.
+FROM node:18-alpine AS admin-builder
+WORKDIR /app
+COPY demo/admin.html demo/admin.css demo/admin.js demo/build-admin.mjs ./
+RUN mkdir -p admin-dist \
+    && node build-admin.mjs standalone admin-dist
+
 # Production stage with nginx
 FROM nginx:alpine AS production
 WORKDIR /usr/share/nginx/html
@@ -20,8 +29,8 @@ RUN rm -rf ./*
 # Copy built web component files
 COPY --from=builder /app/dist ./
 
-# Copy pre-built admin panel from demo folder
-COPY demo/admin-dist ./admin/
+# Copy built admin panel files
+COPY --from=admin-builder /app/admin-dist ./admin/
 
 # Copy index.html
 COPY web/index.html ./
