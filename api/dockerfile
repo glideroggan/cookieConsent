@@ -4,7 +4,7 @@ WORKDIR /app
 EXPOSE 5220
 
 # Use the .NET SDK for building
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine3.23 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY api.csproj .
 RUN dotnet restore
@@ -17,13 +17,13 @@ RUN dotnet publish -c Release -o /app/publish
 
 # Final stage
 FROM base AS final
-# Upgrade Alpine packages to pick up security patches
-RUN apk upgrade --no-cache
 WORKDIR /app
+
+RUN apk upgrade --no-cache libcrypto3 libssl3
+
 COPY --from=publish /app/publish .
 
 # Create directory for SQLite database
-RUN mkdir -p /app/data
 ENV ConnectionStrings__DefaultConnection="Data Source=/app/data/consent.db"
 
 ENTRYPOINT ["dotnet", "api.dll"]
