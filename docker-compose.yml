@@ -1,6 +1,6 @@
 services:  # Cookie Consent API
   api:
-    image: docker.io/glideroggan/cookie-consent-api:latest
+    image: docker.io/glideroggan/cookie-consent-api:v1.0.1
     build:
       context: ./api
       dockerfile: dockerfile
