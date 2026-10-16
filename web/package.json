@@ -32,7 +32,8 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
     "copy:demo": "pwsh -Command \"if (!(Test-Path '../demo/dist')) { New-Item -ItemType Directory -Path '../demo/dist' }; Copy-Item 'dist/cookie-consent.js' '../demo/dist/' -Force\"",
     "copy:demo:watch": "pwsh -Command \"while ($true) { Start-Sleep 1; if (Test-Path 'dist/cookie-consent.js') { Copy-Item 'dist/cookie-consent.js' '../demo/dist/' -Force -ErrorAction SilentlyContinue } }\"",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn build",
+    "test": "esbuild test/template.test.ts --bundle --platform=node --format=esm --outfile=.test-dist/template.test.mjs && node --test .test-dist/template.test.mjs"
   },
   "devDependencies": {
     "@parcel/css": "^1.14.0",
