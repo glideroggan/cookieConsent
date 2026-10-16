@@ -3,6 +3,8 @@
 <head>
     <title>Cookie Consent Admin Panel</title>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src http://localhost:5220 http://127.0.0.1:5220; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="no-referrer">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="admin.css">
     <script src="config.js"></script>
@@ -12,15 +14,32 @@
         <header class="admin-header">
             <h1>🍪 Cookie Consent Admin Panel</h1>
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="exportConfig()">📁 Export Config</button>
+                <button class="btn btn-secondary" data-action="export-config">📁 Export Config</button>
+                <button class="btn btn-secondary" id="forget-key-btn" data-action="forget-key" hidden>🔒 Forget key</button>
                 <a href="index.html" class="btn btn-outline">← Back to Demo</a>
             </div>
         </header>
 
+        <div id="key-panel" class="admin-content" hidden>
+            <div class="section">
+                <h2>Admin key</h2>
+                <p class="section-description">Enter the admin API key. It is kept only in this browser tab and is cleared when the tab closes.</p>
+                <div id="key-status" class="alert info" hidden></div>
+                <form id="key-form" class="config-form">
+                    <div class="form-group">
+                        <label for="admin-key">Admin API key</label>
+                        <input type="password" id="admin-key" autocomplete="off" spellcheck="false" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Connect</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="admin-main" hidden>
         <nav class="admin-nav">
-            <button class="nav-tab active" onclick="showTab('global')">Global Config</button>
-            <button class="nav-tab" onclick="showTab('categories')">Categories</button>
-            <button class="nav-tab" onclick="showTab('cookies')">Cookie Details</button>
+            <button class="nav-tab active" data-action="tab" data-tab="global">Global Config</button>
+            <button class="nav-tab" data-action="tab" data-tab="categories">Categories</button>
+            <button class="nav-tab" data-action="tab" data-tab="cookies">Cookie Details</button>
         </nav>
 
         <main class="admin-content">
@@ -29,27 +48,27 @@
                 <div class="section">
                     <h2>Global Configuration</h2>
                     <p class="section-description">Configure global settings for your cookie consent system.</p>
-                    
+
                     <form class="config-form">
                         <div class="form-group">
                             <label for="consent-version">Consent Version</label>
                             <input type="text" id="consent-version" placeholder="e.g., v2.1">
                             <small>Version number for tracking consent changes</small>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="consent-description">Description</label>
                             <textarea id="consent-description" rows="3" placeholder="Describe how your site uses cookies..."></textarea>
                             <small>General description shown to users</small>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="privacy-policy-url">Privacy Policy URL</label>
                             <input type="url" id="privacy-policy-url" placeholder="https://yoursite.com/privacy">
                             <small>Link to your detailed privacy policy</small>
                         </div>
-                        
-                        <button type="button" class="btn btn-primary" onclick="saveGlobalConfig()">Save Configuration</button>
+
+                        <button type="button" class="btn btn-primary" data-action="save-global-config">Save Configuration</button>
                     </form>
                 </div>
             </div>
@@ -62,10 +81,10 @@
                             <h2>Consent Categories</h2>
                             <p class="section-description">Manage different types of cookie consent categories.</p>
                         </div>
-                        <button class="btn btn-primary" onclick="showAddCategoryForm()">+ Add Category</button>
+                        <button class="btn btn-primary" data-action="show-add-category">+ Add Category</button>
                     </div>
-                    
-                    <div id="add-category-form" class="form-card" style="display: none;">
+
+                    <div id="add-category-form" class="form-card" hidden>
                         <h3>Add New Category</h3>
                         <form class="category-form">
                             <div class="form-row">
@@ -79,25 +98,25 @@
                                     <input type="text" id="new-category-name" placeholder="e.g., Analytics & Performance" required>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="new-category-description">Description</label>
                                 <textarea id="new-category-description" rows="2" placeholder="Explain what this category includes..." required></textarea>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label>
                                     <input type="checkbox" id="new-category-required"> Required category (cannot be disabled by users)
                                 </label>
                             </div>
-                            
+
                             <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" onclick="hideAddCategoryForm()">Cancel</button>
-                                <button type="button" class="btn btn-primary" onclick="addCategory()">Add Category</button>
+                                <button type="button" class="btn btn-secondary" data-action="hide-add-category">Cancel</button>
+                                <button type="button" class="btn btn-primary" data-action="add-category">Add Category</button>
                             </div>
                         </form>
                     </div>
-                    
+
                     <div id="categories-list" class="categories-grid">
                         <!-- Categories will be loaded here -->
                     </div>
@@ -112,10 +131,10 @@
                             <h2>Cookie Details</h2>
                             <p class="section-description">Manage detailed information about specific cookies.</p>
                         </div>
-                        <button class="btn btn-primary" onclick="showAddCookieForm()">+ Add Cookie</button>
+                        <button class="btn btn-primary" data-action="show-add-cookie">+ Add Cookie</button>
                     </div>
-                    
-                    <div id="add-cookie-form" class="form-card" style="display: none;">
+
+                    <div id="add-cookie-form" class="form-card" hidden>
                         <h3>Add Cookie Information</h3>
                         <form class="cookie-form">
                             <div class="form-row">
@@ -131,12 +150,12 @@
                                     <input type="text" id="new-cookie-name" placeholder="e.g., _ga" required>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="new-cookie-purpose">Purpose</label>
                                 <input type="text" id="new-cookie-purpose" placeholder="e.g., Google Analytics tracking" required>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="new-cookie-duration">Duration</label>
@@ -147,20 +166,21 @@
                                     <input type="text" id="new-cookie-provider" placeholder="e.g., google.com" required>
                                 </div>
                             </div>
-                            
+
                             <div class="form-actions">
-                                <button type="button" class="btn btn-secondary" onclick="hideAddCookieForm()">Cancel</button>
-                                <button type="button" class="btn btn-primary" onclick="addCookieInfo()">Add Cookie</button>
+                                <button type="button" class="btn btn-secondary" data-action="hide-add-cookie">Cancel</button>
+                                <button type="button" class="btn btn-primary" data-action="add-cookie">Add Cookie</button>
                             </div>
                         </form>
                     </div>
-                    
+
                     <div id="cookie-details-container">
                         <!-- Cookie details will be loaded here -->
                     </div>
                 </div>
             </div>
         </main>
+        </div>
     </div>
 
     <!-- Edit Category Modal -->
@@ -168,7 +188,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit Category</h3>
-                <button class="modal-close" onclick="hideEditCategoryModal()">&times;</button>
+                <button class="modal-close" data-action="hide-edit-category">&times;</button>
             </div>
             <form class="category-form">
                 <input type="hidden" id="edit-category-original-key">
@@ -182,21 +202,21 @@
                         <input type="text" id="edit-category-name" required>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="edit-category-description">Description</label>
                     <textarea id="edit-category-description" rows="2" required></textarea>
                 </div>
-                
+
                 <div class="form-group">
                     <label>
                         <input type="checkbox" id="edit-category-required"> Required category
                     </label>
                 </div>
-                
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="hideEditCategoryModal()">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="updateCategory()">Update Category</button>
+                    <button type="button" class="btn btn-secondary" data-action="hide-edit-category">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-action="update-category">Update Category</button>
                 </div>
             </form>
         </div>

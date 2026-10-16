@@ -63,12 +63,6 @@ function buildAdmin(target = 'standalone', outputDir = 'admin-dist') {
             `// API Configuration - Update this to point to your Cookie Consent API
 const API_BASE_URL = window.COOKIE_CONSENT_CONFIG?.apiUrl || 'http://localhost:5220/api/admin';`
         );
-        
-        // Replace hardcoded API key with configurable one for standalone
-        adminJs = adminJs.replace(
-            /const API_KEY = window\.COOKIE_CONSENT_CONFIG\?\.apiKey \|\| 'dev-admin-key-123';/,
-            `const API_KEY = window.COOKIE_CONSENT_CONFIG?.apiKey || 'your-admin-api-key-change-this-in-production';`
-        );
     }
     
     // Write the JS file
@@ -113,21 +107,13 @@ window.COOKIE_CONSENT_CONFIG = {
     // Example: 'https://your-api.azurewebsites.net/api/admin'
     // Example: 'https://your-api.herokuapp.com/api/admin'
     // Example: 'https://api.yourdomain.com/api/admin'
-    apiUrl: 'http://localhost:5220/api/admin',
-    
-    // 🔐 IMPORTANT: Set your admin API key here
-    // This should match the AdminApiKey in your API server's appsettings.json
-    // For production: Use environment variables or secure configuration
-    apiKey: 'your-admin-api-key-change-this-in-production'
-    
-    // For local testing, use these values:
-    // apiUrl: 'http://localhost:5220/api/admin',
-    // apiKey: 'dev-admin-key-123'
+    // Also update connect-src in the CSP meta tag of index.html.
+    // The admin key is not configured here: the page asks for it at runtime (this file is public).
+    apiUrl: 'http://localhost:5220/api/admin'
 };
 
 console.log('🍪 Cookie Consent Admin Panel loaded');
 console.log('📡 API URL:', window.COOKIE_CONSENT_CONFIG.apiUrl);
-console.log('🔐 API Key configured:', !!window.COOKIE_CONSENT_CONFIG.apiKey);
 `;
     
     writeFileSync(resolve(outputDir, 'config.js'), configJs);
