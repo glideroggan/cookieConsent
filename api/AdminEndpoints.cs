@@ -53,19 +53,29 @@ public static class Endpoints
             })
             .ToListAsync();
         return Results.Ok(categories);
-    }    public static async Task<IResult> CreateCategory(Category category, ConsentDbContext db)
-    {        // Check category limit (max 10)
+    }    public static async Task<IResult> CreateCategory(CreateCategoryDto dto, ConsentDbContext db)
+    {
+        if (RequestValidation.Validate(dto) is { } invalid) return invalid;
+
+        // Check category limit (max 10)
         var categoryCount = await db.Categories.CountAsync();
         if (categoryCount >= MaxCategories)
             return Results.BadRequest(new { message = $"Maximum of {MaxCategories} categories allowed" });
 
         // Check for duplicate key
-        if (await db.Categories.AnyAsync(c => c.Key == category.Key))
+        if (await db.Categories.AnyAsync(c => c.Key == dto.Key))
             return Results.BadRequest(new { message = "Category key already exists" });
 
-        category.CreatedAt = DateTime.UtcNow;
-        category.UpdatedAt = DateTime.UtcNow;
-        
+        var category = new Category
+        {
+            Key = dto.Key,
+            Name = dto.Name,
+            Description = dto.Description,
+            Required = dto.Required,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
         db.Categories.Add(category);
         await db.SaveChangesAsync();
         await IncrementVersion(db, "major");
@@ -73,19 +83,21 @@ public static class Endpoints
         return Results.Created($"/categories/{category.Id}", category);
     }
 
-    public static async Task<IResult> UpdateCategory(int id, Category category, ConsentDbContext db)
+    public static async Task<IResult> UpdateCategory(int id, UpdateCategoryDto dto, ConsentDbContext db)
     {
+        if (RequestValidation.Validate(dto) is { } invalid) return invalid;
+
         var existing = await db.Categories.FindAsync(id);
         if (existing == null) return Results.NotFound();
 
         // Check for duplicate key (excluding current)
-        if (await db.Categories.AnyAsync(c => c.Key == category.Key && c.Id != id))
+        if (await db.Categories.AnyAsync(c => c.Key == dto.Key && c.Id != id))
             return Results.BadRequest(new { message = "Category key already exists" });
 
-        existing.Key = category.Key;
-        existing.Name = category.Name;
-        existing.Description = category.Description;
-        existing.Required = category.Required;
+        existing.Key = dto.Key;
+        existing.Name = dto.Name;
+        existing.Description = dto.Description;
+        existing.Required = dto.Required;
         existing.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
@@ -127,23 +139,34 @@ public static class Endpoints
             })
             .ToListAsync();
         return Results.Ok(cookies);
-    }    public static async Task<IResult> CreateCookieDetail(CookieDetail cookie, ConsentDbContext db)
-    {        // Check cookie limit (max 100 total)
+    }    public static async Task<IResult> CreateCookieDetail(CreateCookieDetailDto dto, ConsentDbContext db)
+    {
+        if (RequestValidation.Validate(dto) is { } invalid) return invalid;
+
+        // Check cookie limit (max 100 total)
         var cookieCount = await db.CookieDetails.CountAsync();
         if (cookieCount >= MaxCookies)
             return Results.BadRequest(new { message = $"Maximum of {MaxCookies} cookies allowed" });
 
         // Check if category exists
-        if (!await db.Categories.AnyAsync(c => c.Id == cookie.CategoryId))
+        if (!await db.Categories.AnyAsync(c => c.Id == dto.CategoryId))
             return Results.BadRequest(new { message = "Category does not exist" });
 
         // Check for duplicate name in same category
-        if (await db.CookieDetails.AnyAsync(c => c.Name == cookie.Name && c.CategoryId == cookie.CategoryId))
+        if (await db.CookieDetails.AnyAsync(c => c.Name == dto.Name && c.CategoryId == dto.CategoryId))
             return Results.BadRequest(new { message = "Cookie name already exists in this category" });
 
-        cookie.CreatedAt = DateTime.UtcNow;
-        cookie.UpdatedAt = DateTime.UtcNow;
-        
+        var cookie = new CookieDetail
+        {
+            CategoryId = dto.CategoryId,
+            Name = dto.Name,
+            Purpose = dto.Purpose,
+            Duration = dto.Duration,
+            Provider = dto.Provider,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
         db.CookieDetails.Add(cookie);
         await db.SaveChangesAsync();
         await IncrementVersion(db, "minor");
@@ -151,24 +174,26 @@ public static class Endpoints
         return Results.Created($"/cookie-details/{cookie.Id}", cookie);
     }
 
-    public static async Task<IResult> UpdateCookieDetail(int id, CookieDetail cookie, ConsentDbContext db)
+    public static async Task<IResult> UpdateCookieDetail(int id, CreateCookieDetailDto dto, ConsentDbContext db)
     {
+        if (RequestValidation.Validate(dto) is { } invalid) return invalid;
+
         var existing = await db.CookieDetails.FindAsync(id);
         if (existing == null) return Results.NotFound();
 
         // Check if category exists
-        if (!await db.Categories.AnyAsync(c => c.Id == cookie.CategoryId))
+        if (!await db.Categories.AnyAsync(c => c.Id == dto.CategoryId))
             return Results.BadRequest(new { message = "Category does not exist" });
 
         // Check for duplicate name in same category (excluding current)
-        if (await db.CookieDetails.AnyAsync(c => c.Name == cookie.Name && c.CategoryId == cookie.CategoryId && c.Id != id))
+        if (await db.CookieDetails.AnyAsync(c => c.Name == dto.Name && c.CategoryId == dto.CategoryId && c.Id != id))
             return Results.BadRequest(new { message = "Cookie name already exists in this category" });
 
-        existing.Name = cookie.Name;
-        existing.Purpose = cookie.Purpose;
-        existing.Duration = cookie.Duration;
-        existing.Provider = cookie.Provider;
-        existing.CategoryId = cookie.CategoryId;
+        existing.Name = dto.Name;
+        existing.Purpose = dto.Purpose;
+        existing.Duration = dto.Duration;
+        existing.Provider = dto.Provider;
+        existing.CategoryId = dto.CategoryId;
         existing.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
@@ -206,20 +231,29 @@ public static class Endpoints
         return Results.Ok(config);
     }
 
-    public static async Task<IResult> UpdateGlobalConfig(GlobalConfig config, ConsentDbContext db)
+    public static async Task<IResult> UpdateGlobalConfig(UpdateGlobalConfigDto dto, ConsentDbContext db)
     {
+        if (RequestValidation.Validate(dto) is { } invalid) return invalid;
+
         var existing = await db.GlobalConfigs.FirstOrDefaultAsync();
-        
+        GlobalConfig? config = null;
+
         if (existing == null)
         {
-            config.CreatedAt = DateTime.UtcNow;
-            config.UpdatedAt = DateTime.UtcNow;
+            config = new GlobalConfig
+            {
+                Version = "1.0.0",
+                Description = dto.Description,
+                PrivacyPolicyUrl = dto.PrivacyPolicyUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
             db.GlobalConfigs.Add(config);
         }
         else
         {
-            existing.Description = config.Description;
-            existing.PrivacyPolicyUrl = config.PrivacyPolicyUrl;
+            existing.Description = dto.Description;
+            existing.PrivacyPolicyUrl = dto.PrivacyPolicyUrl;
             existing.UpdatedAt = DateTime.UtcNow;
         }
 
@@ -243,17 +277,19 @@ public static class Endpoints
         };
 
         return Results.Ok(export);
-    }    public static async Task<IResult> ImportConfig(ImportData import, ConsentDbContext db)
+    }    public static async Task<IResult> ImportConfig(ImportDto import, ConsentDbContext db)
     {
         // Validate limits before importing
         if (import.Categories != null)
         {            if (import.Categories.Count > MaxCategories)
                 return Results.BadRequest(new { message = $"Import contains more than {MaxCategories} categories (limit: {MaxCategories})" });
 
-            var totalCookies = import.Categories.Sum(c => c.CookieDetails.Count);
+            var totalCookies = import.Categories.Sum(c => c?.CookieDetails?.Count ?? 0);
             if (totalCookies > MaxCookies)
                 return Results.BadRequest(new { message = $"Import contains {totalCookies} cookies (limit: {MaxCookies})" });
         }
+
+        if (RequestValidation.ValidateImport(import) is { } invalid) return invalid;
 
         // Clear existing data
         db.CookieDetails.RemoveRange(db.CookieDetails);
@@ -263,28 +299,42 @@ public static class Endpoints
         // Import global config
         if (import.GlobalConfig != null)
         {
-            import.GlobalConfig.Id = 0; // Reset ID
-            import.GlobalConfig.CreatedAt = DateTime.UtcNow;
-            import.GlobalConfig.UpdatedAt = DateTime.UtcNow;
-            db.GlobalConfigs.Add(import.GlobalConfig);
+            db.GlobalConfigs.Add(new GlobalConfig
+            {
+                Version = string.IsNullOrEmpty(import.GlobalConfig.Version) ? "1.0.0" : import.GlobalConfig.Version,
+                Description = import.GlobalConfig.Description,
+                PrivacyPolicyUrl = import.GlobalConfig.PrivacyPolicyUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
         }
 
-        // Import categories and cookies
+        // Import categories and cookies; ids and category links are assigned here, never taken from the payload
         if (import.Categories != null)
         {
-            foreach (var category in import.Categories)
+            foreach (var categoryDto in import.Categories)
             {
-                category.Id = 0; // Reset ID
-                category.CreatedAt = DateTime.UtcNow;
-                category.UpdatedAt = DateTime.UtcNow;
-
-                // Reset cookie IDs
-                foreach (var cookie in category.CookieDetails)
+                var category = new Category
                 {
-                    cookie.Id = 0;
-                    cookie.CategoryId = 0; // Will be set by EF
-                    cookie.CreatedAt = DateTime.UtcNow;
-                    cookie.UpdatedAt = DateTime.UtcNow;
+                    Key = categoryDto.Key,
+                    Name = categoryDto.Name,
+                    Description = categoryDto.Description,
+                    Required = categoryDto.Required,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                foreach (var cookieDto in categoryDto.CookieDetails ?? [])
+                {
+                    category.CookieDetails.Add(new CookieDetail
+                    {
+                        Name = cookieDto.Name,
+                        Purpose = cookieDto.Purpose,
+                        Duration = cookieDto.Duration,
+                        Provider = cookieDto.Provider,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
                 }
 
                 db.Categories.Add(category);
@@ -347,10 +397,4 @@ public static class Endpoints
         config.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
     }
-}
-
-public class ImportData
-{
-    public GlobalConfig? GlobalConfig { get; set; }
-    public List<Category>? Categories { get; set; }
 }

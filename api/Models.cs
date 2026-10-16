@@ -180,16 +180,93 @@ public class GlobalConfigDto
 
 public class UpdateGlobalConfigDto
 {
-    [Required]
+    // Accepted for compatibility with the admin page, but ignored: the server owns the version.
     [MaxLength(20)]
-    public string Version { get; set; } = string.Empty;
-    
+    public string? Version { get; set; }
+
     [Required]
     [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
-    
+
     [MaxLength(500)]
+    [HttpsUrl]
     public string? PrivacyPolicyUrl { get; set; }
+}
+
+// Import shape: the export format without ids. Ids and foreign keys in the payload are ignored, the server
+// assigns them when it maps these to entities.
+public class ImportDto
+{
+    public ImportGlobalConfigDto? GlobalConfig { get; set; }
+    public List<ImportCategoryDto>? Categories { get; set; }
+}
+
+public class ImportGlobalConfigDto
+{
+    [MaxLength(20)]
+    [RegularExpression(@"^\d{1,6}(\.\d{1,6}){0,2}$", ErrorMessage = "Version must be numbers separated by dots, e.g. 1.2.0")]
+    public string? Version { get; set; }
+
+    [Required]
+    [MaxLength(1000)]
+    public string Description { get; set; } = string.Empty;
+
+    [MaxLength(500)]
+    [HttpsUrl]
+    public string? PrivacyPolicyUrl { get; set; }
+}
+
+public class ImportCategoryDto
+{
+    [Required]
+    [MaxLength(50)]
+    [RegularExpression(@"^[a-z][a-z0-9_]*$", ErrorMessage = "Key must be lowercase letters, numbers, and underscores only, starting with a letter")]
+    public string Key { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(500)]
+    public string Description { get; set; } = string.Empty;
+
+    public bool Required { get; set; }
+
+    public List<ImportCookieDetailDto>? CookieDetails { get; set; }
+}
+
+public class ImportCookieDetailDto
+{
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(300)]
+    public string Purpose { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(50)]
+    public string Duration { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(100)]
+    public string Provider { get; set; } = string.Empty;
+}
+
+// The privacy policy link is rendered as a link for visitors, so only absolute https URLs are allowed
+// (no javascript:, data: or plain http). Empty means "no link".
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class HttpsUrlAttribute : ValidationAttribute
+{
+    public HttpsUrlAttribute() : base("The {0} field must be an absolute https:// URL.") { }
+
+    public override bool IsValid(object? value)
+    {
+        if (value is not string text || text.Length == 0) return true;
+        return Uri.TryCreate(text, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps;
+    }
 }
 
 // Simple models for public consent API
