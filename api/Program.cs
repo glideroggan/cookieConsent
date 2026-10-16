@@ -19,18 +19,19 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });    options.AddPolicy("AdminOnly", policy =>
     {
-        // Get allowed admin origins from configuration
-        var allowedAdminOrigins = builder.Configuration.GetSection("AllowedAdminOrigins").Get<string[]>() 
-            ?? new[] { "http://localhost:3000", "https://glideroggan.github.io" };
-        
+        // Admin origins come only from configuration: no code fallback, so missing config means no browser access
+        // to admin. No credentials either: the key travels in the X-API-Key header, not in a cookie.
+        var allowedAdminOrigins = builder.Configuration.GetSection("AllowedAdminOrigins").Get<string[]>() ?? [];
+
         policy.WithOrigins(allowedAdminOrigins)
               .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials(); // Allow credentials for API key in headers
+              .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
+
+AdminApiKeyPolicy.EnsureUsable(app.Configuration["AdminApiKey"]);
 
 // Enable CORS
 app.UseCors();
@@ -77,3 +78,6 @@ app.MapGroup("/api/admin")
     .MapAdminEndpoints();
 
 app.Run();
+
+// Lets the integration tests host the real app with WebApplicationFactory<Program>.
+public partial class Program { }
