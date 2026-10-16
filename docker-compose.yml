@@ -11,12 +11,20 @@ services:  # Cookie Consent API
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5220
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/consent.db
-      # Security Configuration - Override in production
-      - AdminApiKey=${ADMIN_API_KEY:-your-admin-api-key-change-this-in-production}
-      - AllowedAdminOrigins__0=${ADMIN_ORIGIN_1:-http://localhost:3000}
-      - AllowedAdminOrigins__1=${ADMIN_ORIGIN_2:-http://admin.internal}
+      # Required, no default: at least 32 random characters (openssl rand -hex 32), set in .env (mode 600).
+      # The API refuses to start without a usable key. Admin CORS origins come from appsettings.json.
+      - AdminApiKey=${ADMIN_API_KEY:?ADMIN_API_KEY must be set in .env}
+    # The app runs as uid 1654 (USER $APP_UID in the image); the host data/ folder must be owned by it:
+    # chown -R 1654:1654 data
     volumes:
       - ./data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
 
   # Web Component + Admin Panel Server (nginx)
