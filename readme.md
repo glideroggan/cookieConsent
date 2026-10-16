@@ -40,6 +40,13 @@ When the user accepts/declines, it will:
 
 **No page reload required!** Scripts are dynamically enabled when consent is given.
 
+# Running the API
+- `AdminApiKey` is required and has no default. The API refuses to start when it is missing, shorter than 32 characters or a known placeholder. Generate one with `openssl rand -hex 32` and pass it through the environment (`ADMIN_API_KEY` in `.env` for docker compose, `$env:AdminApiKey` for `dotnet run`).
+- The admin page (`docs/admin`) never stores the key: it asks for it at runtime and keeps it for the browser tab only.
+- Admin CORS allows only the origins in `AllowedAdminOrigins` (production: the GitHub Pages admin; development origins are in `appsettings.Development.json`).
+- The container runs as uid 1654 with a read-only root filesystem; a bind-mounted `data/` folder must be owned by that uid (`chown -R 1654:1654 data`).
+- Tests: `dotnet test cookieConsent.sln` (API) and `yarn --cwd web test` (widget).
+
 # Flowchart
 ```mermaid
 flowchart TD
