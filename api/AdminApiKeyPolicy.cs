@@ -19,7 +19,7 @@ public static class AdminApiKeyPolicy
     {
         // Error messages name the setting but never echo its value.
         if (string.IsNullOrWhiteSpace(key))
-            throw new InvalidOperationException("AdminApiKey is not configured. Set it through the environment (AdminApiKey) or user secrets.");
+            throw new InvalidOperationException("AdminApiKey is not configured. Set it through the environment (AdminApiKey).");
 
         if (key.Trim().Length < MinimumLength)
             throw new InvalidOperationException($"AdminApiKey is shorter than {MinimumLength} characters. Use a random value, e.g. `openssl rand -hex 32`.");
