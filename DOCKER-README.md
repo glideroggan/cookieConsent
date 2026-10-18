@@ -27,6 +27,8 @@ This guide will help you deploy the Cookie Consent component and API using Docke
 - SQLite database stored in Docker volume
 - CORS enabled for all origins
 - Endpoints:
+  - `GET /health` - 200 when the database answers, else 503
+  - `GET /version` - the running version (from `api/VERSION`)
   - `GET /api/admin/global-config` - Get global configuration
   - `GET /api/admin/categories` - Get consent categories
   - `POST /api/admin/categories` - Add new category

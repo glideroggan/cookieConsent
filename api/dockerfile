@@ -6,7 +6,8 @@ EXPOSE 5220
 # Use the .NET SDK for building
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY api.csproj .
+# VERSION goes with the project file: api.csproj reads its <Version> from it, already at restore.
+COPY api.csproj VERSION ./
 RUN dotnet restore
 COPY . .
 RUN dotnet build -c Release -o /app/build

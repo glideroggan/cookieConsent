@@ -55,6 +55,42 @@ flowchart TD
     C --> END
 ```
 
+# The consent API on Deployer staging slots
+The API (`api/`, image `glideroggan/cookie-consent-api`) is built for Deployer's staging slots: production and staging
+run the same image, each with its own environment.
+
+| Endpoint | Answers |
+|---|---|
+| `GET /health` | 200 `{status, database, version}` only when a real query on the database works; 503 otherwise (also for an empty database file, which SQLite creates on open). Deployer's slot check and the suite use it. |
+| `GET /version` | 200 `{version}`, the running version, never cached |
+
+**Version.** `api/VERSION` is the one place: `api.csproj` reads its `<Version>` from it, and `deployer.staging.json`
+names it as the `versionFile` the staging release reads. Bump it on the `staging` branch with the change and add
+`release-notes/<version>.md` (1 to 3 lines, at most 300 characters, written by hand).
+
+**Configuration per slot (environment, never code).**
+
+| Setting | What it does |
+|---|---|
+| `AdminApiKey` | the admin key (`X-API-Key`); staging gets its own. Empty means every admin request is refused. |
+| `AdminCorsOrigins` | comma-separated admin origins; when set it **replaces** `AllowedAdminOrigins` from appsettings, so staging inherits none of production's. Set but empty: no admin origin. |
+| `AllowedAdminOrigins__0`, `__1`, ... | the older list; environment entries only override appsettings entries by index |
+| `ConnectionStrings__DefaultConnection` | the SQLite file (`/app/data/consent.db` in the image) |
+
+**Tests.** `dotnet test cookieConsent.sln` runs `api.Tests` (the real app on a temp SQLite file per test: `/health`
+200 and 503, `/version`, the admin key and CORS origins). The suite Deployer runs after a staging deploy is
+`tests/apps/cookie-consent.ps1` in the Deployer repo (a copy is kept in `deployer-suite/`); it is read-only and needs no key.
+
+```mermaid
+flowchart LR
+    S[staging branch: VERSION + release note] --> R[Deployer release-staging builds the image]
+    R --> St[staging slot, own .env: AdminApiKey, AdminCorsOrigins]
+    St --> H{GET /health}
+    H -- 200: database answers --> Suite[suite: health, version, consent, admin refuses without key]
+    H -- 503 --> Stop[staging not healthy: nothing to flip]
+    Suite --> F[owner flips: staging becomes production]
+```
+
 # BUGS
 - removing a category and then switching over to global config, then the version is still lagging behind
 

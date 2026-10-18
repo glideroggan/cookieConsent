@@ -1,0 +1,9 @@
+{
+  "workload": "cookie-consent",
+  "deployerUrl": "https://nyviken.se/deployer-api",
+  "baseUrl": "https://nyviken.se/cookie-consent-api/",
+  "versionFile": "api/VERSION",
+  "services": {
+    "api": { "image": "docker.io/glideroggan/cookie-consent-api", "dockerfile": "api/dockerfile", "context": "api" }
+  }
+}
