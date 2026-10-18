@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Api.Data;
 using Api.Admin;
+using Api.Health;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,11 +20,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });    options.AddPolicy("AdminOnly", policy =>
     {
-        // Get allowed admin origins from configuration
-        var allowedAdminOrigins = builder.Configuration.GetSection("AllowedAdminOrigins").Get<string[]>() 
-            ?? new[] { "http://localhost:3000", "https://glideroggan.github.io" };
-        
-        policy.WithOrigins(allowedAdminOrigins)
+        policy.WithOrigins(AdminOrigins.Read(builder.Configuration))
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); // Allow credentials for API key in headers
@@ -41,6 +38,8 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<ConsentDbContext>();
     context.Database.EnsureCreated();
 }
+
+app.MapHealthEndpoints();
 
 // Legacy endpoint for existing demo
 app.MapGet("/consent", async (ConsentDbContext db) => await ConsentService.GetConsentAsync(db))
@@ -77,3 +76,6 @@ app.MapGroup("/api/admin")
     .MapAdminEndpoints();
 
 app.Run();
+
+// The test project starts the app through WebApplicationFactory<Program>.
+public partial class Program { }

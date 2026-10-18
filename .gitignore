@@ -1,5 +1,8 @@
 api/bin/**
 api/obj/**
+api.Tests/bin/**
+api.Tests/obj/**
+.scratch/
 **/node_modules/**
 **/dist/**
 **/consent.db
