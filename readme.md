@@ -72,13 +72,14 @@ names it as the `versionFile` the staging release reads. Bump it on the `staging
 
 | Setting | What it does |
 |---|---|
-| `AdminApiKey` | the admin key (`X-API-Key`); staging gets its own. Empty means every admin request is refused. |
+| `AdminApiKey` | the admin key (`X-API-Key`); staging gets its own. In Development an empty key means every admin request is refused; outside Development it stops the start (below). |
 | `AdminCorsOrigins` | comma-separated admin origins; when set it **replaces** `AllowedAdminOrigins` from appsettings, so staging inherits none of production's. Set but empty: no admin origin. |
 | `AllowedAdminOrigins__0`, `__1`, ... | the older list; environment entries only override appsettings entries by index |
 | `ConnectionStrings__DefaultConnection` | the SQLite file (`/app/data/consent.db` in the image) |
 
-Outside Development the app refuses to start (one error naming `AdminApiKey`, never its value; non-zero exit) while
-`AdminApiKey` is missing, empty or still the placeholder from `appsettings.json`; set the slot's own key in its environment.
+Outside Development the app refuses to start (a critical log line and the exception, both naming `AdminApiKey`, never
+its value; non-zero exit) while `AdminApiKey` is missing, empty or one of the example keys this repository shows
+(`AdminKeyRules.PublicExampleValues`); set the slot's own random key in its environment.
 
 **Tests.** `dotnet test cookieConsent.sln` runs `api.Tests` (the real app on a temp SQLite file per test: `/health`
 200 and 503, `/version`, the admin key and CORS origins). The suite Deployer runs after a staging deploy is

@@ -41,6 +41,34 @@ public class AdminKeyGuardTests
         Assert.Contains("AdminApiKey", error.Message);
     }
 
+    [Theory]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    public void Production_with_a_whitespace_only_key_refuses_to_start(string key)
+    {
+        var error = StartFails(new() { ["AdminApiKey"] = key }, "Production");
+
+        Assert.Contains("AdminApiKey is not set", error.Message);
+    }
+
+    /// <summary>Every admin key the repository itself ships (appsettings, .env.example, demo and docs admin configs).</summary>
+    [Theory]
+    [InlineData("your-admin-api-key-change-this-in-production")]
+    [InlineData("your-secure-admin-api-key-here")]
+    [InlineData("dev-admin-key-123")]
+    [InlineData("your-production-api-key-here")]
+    [InlineData("production-change-me-please")]
+    [InlineData("  your-admin-api-key-change-this-in-production  ")]
+    [InlineData("YOUR-ADMIN-API-KEY-CHANGE-THIS-IN-PRODUCTION")]
+    [InlineData(" Dev-Admin-Key-123\t")]
+    public void Production_with_a_public_example_key_refuses_to_start(string key)
+    {
+        var error = StartFails(new() { ["AdminApiKey"] = key }, "Production");
+
+        Assert.Contains("AdminApiKey is a public example value", error.Message);
+        Assert.DoesNotContain(key.Trim(), error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Fact]
     public async Task Production_with_a_real_key_starts()
     {
