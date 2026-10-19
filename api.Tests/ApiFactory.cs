@@ -12,9 +12,12 @@ namespace Api.Tests;
 public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     private readonly Dictionary<string, string?> _settings;
+    private readonly string? _environment;
 
-    public ApiFactory(Dictionary<string, string?>? settings = null)
+    /// <param name="environment">The host environment; null keeps the factory's default (Development).</param>
+    public ApiFactory(Dictionary<string, string?>? settings = null, string? environment = null)
     {
+        _environment = environment;
         DataFolder = Path.Combine(Path.GetTempPath(), "cookie-consent-tests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(DataFolder);
         _settings = new Dictionary<string, string?>(settings ?? new())
@@ -27,6 +30,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        if (_environment is not null) builder.UseEnvironment(_environment);
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(_settings));
     }
 

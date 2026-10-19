@@ -29,6 +29,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Outside Development never serve the admin API with a missing or the public placeholder key; Development keeps its own.
+AdminKeyRules.EnsureSet(app.Configuration[AdminKeyRules.SettingKey], app.Environment, app.Logger);
+
 // Enable CORS
 app.UseCors();
 

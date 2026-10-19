@@ -77,6 +77,9 @@ names it as the `versionFile` the staging release reads. Bump it on the `staging
 | `AllowedAdminOrigins__0`, `__1`, ... | the older list; environment entries only override appsettings entries by index |
 | `ConnectionStrings__DefaultConnection` | the SQLite file (`/app/data/consent.db` in the image) |
 
+Outside Development the app refuses to start (one error naming `AdminApiKey`, never its value; non-zero exit) while
+`AdminApiKey` is missing, empty or still the placeholder from `appsettings.json`; set the slot's own key in its environment.
+
 **Tests.** `dotnet test cookieConsent.sln` runs `api.Tests` (the real app on a temp SQLite file per test: `/health`
 200 and 503, `/version`, the admin key and CORS origins). The suite Deployer runs after a staging deploy is
 `tests/apps/cookie-consent.ps1` in the Deployer repo (a copy is kept in `deployer-suite/`); it is read-only and needs no key.
