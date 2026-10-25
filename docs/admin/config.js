@@ -14,7 +14,7 @@ window.COOKIE_CONSENT_CONFIG = {
       // 🔐 IMPORTANT: Set your admin API key here
     // This should match the AdminApiKey in your API server's appsettings.json
     // For production: Use environment variables or secure configuration
-    apiKey: 'production-change-me-please',
+    apiKey: 'demo-sNshKTirDr192zULqXDERGZrpGmnXAB32zDVKGvlNzSoa7P',
     
     // For local testing, uncomment these lines:
     // apiUrl: 'http://localhost:5220/api/admin',
